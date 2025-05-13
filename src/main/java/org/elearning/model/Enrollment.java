@@ -17,6 +17,7 @@ public class Enrollment {
 
     private Instant enrollmentDate;
 
+
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;

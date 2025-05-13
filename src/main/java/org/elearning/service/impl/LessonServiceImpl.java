@@ -9,6 +9,7 @@ import org.elearning.service.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,46 +20,67 @@ import java.util.stream.Collectors;
 public class LessonServiceImpl implements LessonService {
 
     private final LessonRepository lessonRepository;
-
-
     private final CourseRepository courseRepository;
 
+    private LessonDTO convertToDTO(Lesson lesson) {
+        LessonDTO dto = new LessonDTO();
+        dto.setId(lesson.getId().toString());
+        dto.setCourseId(lesson.getCourse().getId().toString());
+        dto.setName(lesson.getName());
+        dto.setDescription(lesson.getDescription());
+        dto.setReferenceLink(lesson.getReferenceLink());
+        if (lesson.getLessonDate() != null) {
+            dto.setLessonDate(lesson.getLessonDate().toString());
+        }
+        return dto;
+    }
+
     @Override
-    // Get all lessons
     public List<LessonDTO> getAllLessons() {
-        List<Lesson> lessons = lessonRepository.findAll();
-        return lessons.stream()
+        return lessonRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    // Get lesson by ID
     public LessonDTO getLessonById(UUID id) {
-        Optional<Lesson> lesson = lessonRepository.findById(id);
-        return lesson.map(this::convertToDTO).orElse(null);
+        return lessonRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElse(null);
     }
 
     @Override
-    // Create new lesson
     public LessonDTO createLesson(LessonDTO lessonDTO) {
         Lesson lesson = new Lesson();
+        // Map course relation
+        UUID courseId = UUID.fromString(lessonDTO.getCourseId());
+        courseRepository.findById(courseId).ifPresent(lesson::setCourse);
+        // Map other fields
         lesson.setName(lessonDTO.getName());
         lesson.setDescription(lessonDTO.getDescription());
-        lesson.setCourse(courseRepository.findById(UUID.fromString(lessonDTO.getCourseId())).orElse(null));
+        lesson.setReferenceLink(lessonDTO.getReferenceLink());
+        if (lessonDTO.getLessonDate() != null) {
+            lesson.setLessonDate(Instant.parse(lessonDTO.getLessonDate()));
+        }
         lesson = lessonRepository.save(lesson);
         return convertToDTO(lesson);
     }
 
     @Override
-    // Update lesson
     public LessonDTO updateLesson(UUID id, LessonDTO lessonDTO) {
-        Optional<Lesson> existingLesson = lessonRepository.findById(id);
-        if (existingLesson.isPresent()) {
-            Lesson lesson = existingLesson.get();
+        Optional<Lesson> existing = lessonRepository.findById(id);
+        if (existing.isPresent()) {
+            Lesson lesson = existing.get();
+            // Map course
+            UUID courseId = UUID.fromString(lessonDTO.getCourseId());
+            courseRepository.findById(courseId).ifPresent(lesson::setCourse);
+            // Map updated fields
             lesson.setName(lessonDTO.getName());
             lesson.setDescription(lessonDTO.getDescription());
-            lesson.setCourse(courseRepository.findById(UUID.fromString(lessonDTO.getCourseId())).orElse(null));
+            lesson.setReferenceLink(lessonDTO.getReferenceLink());
+            if (lessonDTO.getLessonDate() != null) {
+                lesson.setLessonDate(Instant.parse(lessonDTO.getLessonDate()));
+            }
             lesson = lessonRepository.save(lesson);
             return convertToDTO(lesson);
         }
@@ -66,18 +88,8 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    // Delete lesson
     public void deleteLesson(UUID id) {
         lessonRepository.deleteById(id);
     }
-
-    // Convert Lesson to LessonDTO
-    private LessonDTO convertToDTO(Lesson lesson) {
-        LessonDTO dto = new LessonDTO();
-        dto.setId(lesson.getId().toString());
-        dto.setName(lesson.getName());
-        dto.setDescription(lesson.getDescription());
-        dto.setCourseId(lesson.getCourse().getId().toString());
-        return dto;
-    }
 }
+

@@ -8,5 +8,6 @@ public class MaterialDTO {
     private String lessonId; // Liên kết với Lesson
     private String referenceLink;
     private String title; // Added field for title
-    private String url; // Added field for URL
+    private String url;
+    private String uploadAt;// Added field for URL
 }

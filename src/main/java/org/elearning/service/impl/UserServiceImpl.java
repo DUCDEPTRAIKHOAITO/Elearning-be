@@ -38,14 +38,14 @@ public class UserServiceImpl implements UserService {
     @Override
     // Lấy người dùng theo ID
     public UserDTO getUserById(UUID id) {
-        Optional<User> user = userRepository.findById(id.toString());  // Make sure you're passing UUID here
+        Optional<User> user = userRepository.findById(UUID.fromString(id.toString()));  // Make sure you're passing UUID here
         return user.map(this::convertToDTO).orElse(null);
     }
 
     @Override
 //     Tạo mới người dùng
     public UserDTO createUser(UserDTO userDTO) {
-        Role role = roleRepository.findById(userDTO.getRoleId()).orElse(null);  // Look up Role by UUID
+        Role role = roleRepository.findById(UUID.fromString(userDTO.getRoleId())).orElse(null);  // Look up Role by UUID
         User user = new User();
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
@@ -59,15 +59,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     // Cập nhật người dùng
-    public UserDTO updateUser(UUID id, UserDTO userDTO) {
-        Optional<User> existingUser = userRepository.findById(String.valueOf(id));
+    public UserDTO updateUser(UserDTO userDTO) {
+        Optional<User> existingUser = userRepository.findById(UUID.fromString(userDTO.getId()));
         if (existingUser.isPresent()) {
             User user = existingUser.get();
             user.setName(userDTO.getName());
             user.setEmail(userDTO.getEmail());
             user.setPassword(userDTO.getPassword());
             user.setStatus(UserStatus.valueOf(userDTO.getStatus()));  // Cập nhật status từ DTO
-            user.setRole(roleRepository.findById(userDTO.getRoleId()).orElse(null));  // Cập nhật role
+            user.setRole(roleRepository.findById(UUID.fromString(userDTO.getRoleId())).orElse(null));  // Cập nhật role
 //            if (userDTO.getRoleId() != null) {
 //                UUID roleId = UUID.fromString(userDTO.getRoleId());
 //                Role role = roleRepository.findById(String.valueOf(roleId))
@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
     @Override
     // Xóa người dùng
     public void deleteUser(UUID id) {
-        userRepository.deleteById(String.valueOf(id));
+        userRepository.deleteById(id);
     }
 
     // Chuyển đổi User thành UserDTO

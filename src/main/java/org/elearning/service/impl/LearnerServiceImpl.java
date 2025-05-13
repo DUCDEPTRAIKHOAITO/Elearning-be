@@ -19,63 +19,65 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LearnerServiceImpl implements LearnerService {
 
-
     private final LearnerRepository learnerRepository;
-
-
     private final UserRepository userRepository;
 
     // Convert Learner entity to LearnerDTO
     private LearnerDTO convertToDTO(Learner learner) {
         LearnerDTO dto = new LearnerDTO();
         dto.setId(learner.getId().toString());  // Convert UUID to String
-        dto.setUserId(learner.getUser().getId().toString());  // Convert UUID to String
-        dto.setLearnerStatus(learner.getStatus().toString());  // Convert enum to string
+        // Guard against null user
+        if (learner.getUser() != null) {
+            dto.setUserId(learner.getUser().getId().toString());
+        }
+        dto.setLearnerStatus(learner.getStatus().name());  // Convert enum to string
         return dto;
     }
 
     @Override
-    // Create a new learner
     public LearnerDTO createLearner(LearnerDTO learnerDTO) {
         Learner learner = new Learner();
-        learner.setStatus(LearnerStatus.valueOf(learnerDTO.getLearnerStatus()));  // Convert string to enum
-        learner.setUser(userRepository.findById(learnerDTO.getUserId()).orElse(null));  // Convert String to UUID
+        learner.setStatus(LearnerStatus.valueOf(learnerDTO.getLearnerStatus()));
+        // Correctly map userId from DTO
+        UUID userId = UUID.fromString(learnerDTO.getUserId());
+        userRepository.findById(userId).ifPresent(learner::setUser);
         learner = learnerRepository.save(learner);
         return convertToDTO(learner);
     }
 
     @Override
-    // Update learner
     public LearnerDTO updateLearner(UUID id, LearnerDTO learnerDTO) {
-        Optional<Learner> existingLearner = learnerRepository.findById(id);
-        if (existingLearner.isPresent()) {
-            Learner learner = existingLearner.get();
-            learner.setStatus(LearnerStatus.valueOf(learnerDTO.getLearnerStatus()));  // Convert string to enum
-            learner.setUser(userRepository.findById(learnerDTO.getUserId()).orElse(null));  // Convert String to UUID
+        Optional<Learner> existing = learnerRepository.findById(id);
+        if (existing.isPresent()) {
+            Learner learner = existing.get();
+            learner.setStatus(LearnerStatus.valueOf(learnerDTO.getLearnerStatus()));
+            // Correctly map userId from DTO instead of DTO id
+            UUID userId = UUID.fromString(learnerDTO.getUserId());
+            userRepository.findById(userId).ifPresent(learner::setUser);
             learner = learnerRepository.save(learner);
             return convertToDTO(learner);
         }
         return null;
     }
+
     @Override
-    // Get all learners
     public List<LearnerDTO> getAllLearners() {
-        List<Learner> learners = learnerRepository.findAll();
-        return learners.stream()
+        return learnerRepository.findAll()
+                .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    // Get learner by ID
     public LearnerDTO getLearnerById(UUID id) {
-        Optional<Learner> learner = learnerRepository.findById(id);
-        return learner.map(this::convertToDTO).orElse(null);
+        return learnerRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElse(null);
     }
 
     @Override
-    // Delete learner
     public void deleteLearner(UUID id) {
         learnerRepository.deleteById(id);
     }
 }
+

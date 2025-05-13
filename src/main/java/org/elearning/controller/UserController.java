@@ -35,9 +35,9 @@ public class UserController {
         return ResponseEntity.ok(userService.createUser(userDTO));
     }
 
-    @PostMapping("/update_id")
-    public ResponseEntity<UserDTO> updateUserWithPost(@RequestParam UUID id, @RequestBody UserDTO userDTO) {
-        UserDTO updated = userService.updateUser(id, userDTO);
+    @PutMapping
+    public ResponseEntity<UserDTO> updateUserWithPost(@RequestBody UserDTO userDTO) {
+        UserDTO updated = userService.updateUser(userDTO);
         return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
     }
 
