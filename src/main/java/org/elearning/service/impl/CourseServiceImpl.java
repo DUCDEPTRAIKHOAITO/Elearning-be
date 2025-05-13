@@ -2,6 +2,7 @@ package org.elearning.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.elearning.dto.elearning.CourseDTO;
+import org.elearning.enums.CourseStatus;
 import org.elearning.model.Course;
 import org.elearning.respository.CourseRepository;
 import org.elearning.respository.CategoryRepository;
@@ -46,19 +47,32 @@ public class CourseServiceImpl implements CourseService {
         course.setName(courseDTO.getName());
         course.setDescription(courseDTO.getDescription());
         course.setCategory(categoryRepository.findById(UUID.fromString(courseDTO.getCategoryId())).orElse(null));
+        // Mapping trạng thái từ DTO xuống Entity
+        if (courseDTO.getCourseStatus() != null) {
+            course.setStatus(CourseStatus.valueOf(courseDTO.getCourseStatus()));
+        } else {
+            // hoặc gán mặc định
+            course.setStatus(CourseStatus.ACTIVE);
+        }
+
         course = courseRepository.save(course);
         return convertToDTO(course);
     }
 
-    @Override
-    // Update course
     public CourseDTO updateCourse(UUID id, CourseDTO courseDTO) {
         Optional<Course> existingCourse = courseRepository.findById(id);
         if (existingCourse.isPresent()) {
             Course course = existingCourse.get();
             course.setName(courseDTO.getName());
             course.setDescription(courseDTO.getDescription());
-            course.setCategory(categoryRepository.findById(UUID.fromString(courseDTO.getCategoryId())).orElse(null));
+            course.setCategory(
+                    categoryRepository.findById(UUID.fromString(courseDTO.getCategoryId()))
+                            .orElse(null)
+            );
+            // Mapping status
+            if (courseDTO.getCourseStatus() != null) {
+                course.setStatus(CourseStatus.valueOf(courseDTO.getCourseStatus()));
+            }
             course = courseRepository.save(course);
             return convertToDTO(course);
         }
@@ -78,6 +92,10 @@ public class CourseServiceImpl implements CourseService {
         dto.setName(course.getName());
         dto.setDescription(course.getDescription());
         dto.setCategoryId(course.getCategory().getId().toString());
+        // Thiếu dòng này trước kia
+        dto.setCourseStatus(course.getStatus() != null
+                ? course.getStatus().name()
+                : null);
         return dto;
     }
 }

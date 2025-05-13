@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,7 +30,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     // Lấy 1 role theo ID
     public RoleDTO getRoleById(String id) {
-        Optional<Role> role = roleRepository.findById(id);
+        Optional<Role> role = roleRepository.findById(UUID.fromString(id));
         return role.map(this::convertToDTO).orElse(null);
     }
 
@@ -47,7 +48,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     // Cập nhật role
     public RoleDTO updateRole(String id, RoleDTO roleDTO) {
-        Optional<Role> existing = roleRepository.findById(id);
+        Optional<Role> existing = roleRepository.findById(UUID.fromString(id));
         if (existing.isPresent()) {
             Role role = existing.get();
             role.setName(roleDTO.getName());
@@ -61,7 +62,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     // Xóa role
     public void deleteRole(String id) {
-        roleRepository.deleteById(id);
+        roleRepository.deleteById(UUID.fromString(id));
     }
 
     // Chuyển Role → RoleDTO

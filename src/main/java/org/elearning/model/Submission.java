@@ -4,23 +4,25 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.UUID;
-@Data
 @Entity
 @Table(name = "submission")
+@Data
 public class Submission {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "assignment_id")
-    private Assignment assignment; // Relationship with Assignment
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignment_id", nullable = false)
+    private Assignment assignment;
 
-    @ManyToOne
-    @JoinColumn(name = "learner_id")
-    private Learner learner; // Relationship with Learner
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "learner_id", nullable = false)
+    private Learner learner;
 
+    @Column(name = "date", nullable = false)
     private String date;
-    private String grade;
 
-    // Getters, Setters, Constructors
+    @Column(name = "grade")
+    private String grade;
 }

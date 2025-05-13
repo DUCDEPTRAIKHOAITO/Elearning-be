@@ -3,9 +3,13 @@ package org.elearning.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.elearning.dto.elearning.AdminDTO;
+import org.elearning.dto.elearning.UserDTO;
 import org.elearning.model.Admin;
+import org.elearning.model.User;
 import org.elearning.respository.AdminRepository;
+import org.elearning.respository.UserRepository;
 import org.elearning.service.AdminService;
+import org.elearning.service.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +22,7 @@ import java.util.stream.Collectors;
 public class AdminServiceImpl implements AdminService {
 
     private final AdminRepository adminRepository;
+    private final UserRepository userRepository;
 
     @Override
     // Lấy tất cả Admins
@@ -37,7 +42,12 @@ public class AdminServiceImpl implements AdminService {
     // Tạo mới Admin
     public AdminDTO createAdmin(AdminDTO adminDTO) {
         Admin admin = new Admin();
+        admin.setName(adminDTO.getName());
+        admin.setEmail(adminDTO.getEmail());
+        admin.setPassword(adminDTO.getPassword());
+        admin.setStatus(adminDTO.getStatus());
         admin.setDepartmentName(adminDTO.getDepartmentName());
+
         // Logic lưu Admin vào CSDL
         admin = adminRepository.save(admin);
         return convertToDTO(admin);

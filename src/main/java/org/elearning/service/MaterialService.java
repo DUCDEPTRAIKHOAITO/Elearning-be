@@ -9,5 +9,6 @@ public interface MaterialService {
     List<MaterialDTO> getAllMaterials();
     MaterialDTO getMaterialById(UUID id);
     MaterialDTO createMaterial(MaterialDTO materialDTO);
+    MaterialDTO updateMaterial(UUID id, MaterialDTO materialDTO);
     void deleteMaterial(UUID id);
 }

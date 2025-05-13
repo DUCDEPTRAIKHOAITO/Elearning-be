@@ -19,5 +19,11 @@ public class Material {
     private Lesson lesson;
 
     private String referenceLink;
-    private Instant uploadedAt;
+    @Column(length = 200)
+    private String title;
+
+    @Column(length = 500)
+    private String url;
+
+    private Instant uploadAt;
 }
