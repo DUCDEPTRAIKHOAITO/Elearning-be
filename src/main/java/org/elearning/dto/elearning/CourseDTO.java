@@ -9,4 +9,5 @@ public class CourseDTO {
     private String categoryId; // Liên kết với Category
     private String description;
     private String courseStatus;
+    private String imageUrl;
 }

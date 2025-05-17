@@ -1,5 +1,6 @@
 package org.elearning.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.elearning.dto.elearning.CourseDTO;
 import org.elearning.enums.CourseStatus;
@@ -59,6 +60,17 @@ public class CourseServiceImpl implements CourseService {
         return convertToDTO(course);
     }
 
+    @Override
+    @Transactional
+    public CourseDTO updateImage(UUID id, String imageUrl) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found: " + id));
+        course.setImageUrl(imageUrl);
+        Course saved = courseRepository.save(course);
+        // nếu bạn có method convertToDTO, nhớ set thêm field imageUrl vào DTO
+        return convertToDTO(saved);
+    }
+
     public CourseDTO updateCourse(UUID id, CourseDTO courseDTO) {
         Optional<Course> existingCourse = courseRepository.findById(id);
         if (existingCourse.isPresent()) {
@@ -92,7 +104,7 @@ public class CourseServiceImpl implements CourseService {
         dto.setName(course.getName());
         dto.setDescription(course.getDescription());
         dto.setCategoryId(course.getCategory().getId().toString());
-        // Thiếu dòng này trước kia
+        dto.setImageUrl(course.getImageUrl());
         dto.setCourseStatus(course.getStatus() != null
                 ? course.getStatus().name()
                 : null);

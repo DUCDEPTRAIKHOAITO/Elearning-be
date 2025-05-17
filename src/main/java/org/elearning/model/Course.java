@@ -23,4 +23,7 @@ public class Course {
 
     private String description;
     private CourseStatus status;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 }

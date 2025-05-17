@@ -11,4 +11,5 @@ public interface CourseService {
     CourseDTO createCourse(CourseDTO courseDTO);
     CourseDTO updateCourse(UUID id, CourseDTO courseDTO);
     void deleteCourse(UUID id);
+    CourseDTO updateImage(UUID id, String imageUrl);
 }
