@@ -2,6 +2,7 @@ package org.elearning.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.elearning.dto.elearning.CategoryDTO;
+import org.elearning.enums.CategoryStatus;
 import org.elearning.service.CategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,5 +48,15 @@ public class CategoryController {
     public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<CategoryDTO> updateStatus(@PathVariable UUID id, @RequestParam String status) {
+        try {
+            CategoryStatus st = CategoryStatus.fromString(status);
+            return ResponseEntity.ok(categoryService.updateStatus(id, st));
+        } catch (IllegalArgumentException|IllegalStateException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

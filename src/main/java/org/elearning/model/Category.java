@@ -2,6 +2,7 @@ package org.elearning.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.elearning.enums.CategoryStatus;
 
 import java.util.UUID;
 
@@ -13,9 +14,10 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 100)
     private String categoryName;
-
     private String description;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private CategoryStatus status = CategoryStatus.ACTIVE;
 }
+

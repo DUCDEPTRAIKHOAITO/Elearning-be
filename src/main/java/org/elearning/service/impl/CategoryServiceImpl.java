@@ -1,7 +1,9 @@
 package org.elearning.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.elearning.dto.elearning.CategoryDTO;
+import org.elearning.enums.CategoryStatus;
 import org.elearning.model.Category;
 import org.elearning.respository.CategoryRepository;
 import org.elearning.service.CategoryService;
@@ -17,60 +19,97 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
+    private final CategoryRepository categoryRepository;
 
-    private final   CategoryRepository categoryRepository;
     @Override
-    // Get all categories
     public List<CategoryDTO> getAllCategories() {
-        List<Category> categories = categoryRepository.findAll();
-        return categories.stream()
+        return categoryRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    // Get category by ID
     public CategoryDTO getCategoryById(UUID id) {
-        Optional<Category> category = categoryRepository.findById(id);
-        return category.map(this::convertToDTO).orElse(null);
+        return categoryRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElse(null);
     }
 
     @Override
-    // Create new category
+    @Transactional
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
         Category category = new Category();
         category.setCategoryName(categoryDTO.getCategoryName());
         category.setDescription(categoryDTO.getDescription());
-        category = categoryRepository.save(category);
-        return convertToDTO(category);
-    }
-
-    @Override
-    // Update category
-    public CategoryDTO updateCategory(UUID id, CategoryDTO categoryDTO) {
-        Optional<Category> existingCategory = categoryRepository.findById(id);
-        if (existingCategory.isPresent()) {
-            Category category = existingCategory.get();
-            category.setCategoryName(categoryDTO.getCategoryName());
-            category.setDescription(categoryDTO.getDescription());
-            category = categoryRepository.save(category);
-            return convertToDTO(category);
+        // Gán default status nếu client không truyền
+        if (categoryDTO.getStatus() == null) {
+            category.setStatus(CategoryStatus.ACTIVE);
+        } else {
+            category.setStatus(categoryDTO.getStatus());
         }
-        return null;
+        Category saved = categoryRepository.save(category);
+        return convertToDTO(saved);
     }
 
     @Override
-    // Delete category
+    @Transactional
+    public CategoryDTO updateCategory(UUID id, CategoryDTO categoryDTO) {
+        Optional<Category> opt = categoryRepository.findById(id);
+        if (!opt.isPresent()) {
+            return null;
+        }
+        Category category = opt.get();
+        category.setCategoryName(categoryDTO.getCategoryName());
+        category.setDescription(categoryDTO.getDescription());
+
+        // Nếu client có truyền status, kiểm tra transition rồi mới gán
+        if (categoryDTO.getStatus() != null
+                && !category.getStatus().equals(categoryDTO.getStatus())) {
+            CategoryStatus newStatus = categoryDTO.getStatus();
+            if (!category.getStatus().canTransitionTo(newStatus)) {
+                throw new IllegalStateException(
+                        String.format("Cannot transition status from %s to %s",
+                                category.getStatus(), newStatus));
+            }
+            category.setStatus(newStatus);
+        }
+
+        Category updated = categoryRepository.save(category);
+        return convertToDTO(updated);
+    }
+
+    @Override
+    @Transactional
     public void deleteCategory(UUID id) {
         categoryRepository.deleteById(id);
     }
 
-    // Convert Category to CategoryDTO
+    @Override
+    @Transactional
+    public CategoryDTO updateStatus(UUID id, CategoryStatus newStatus) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found: " + id));
+
+        CategoryStatus current = category.getStatus();
+        if (current.equals(newStatus)) {
+            return convertToDTO(category);
+        }
+        if (!current.canTransitionTo(newStatus)) {
+            throw new IllegalStateException(
+                    String.format("Cannot transition status from %s to %s", current, newStatus));
+        }
+        category.setStatus(newStatus);
+        Category saved = categoryRepository.save(category);
+        return convertToDTO(saved);
+    }
+
+    // Chuyển entity sang DTO nội tuyến, có thêm field status
     private CategoryDTO convertToDTO(Category category) {
         CategoryDTO dto = new CategoryDTO();
         dto.setId(category.getId().toString());
         dto.setCategoryName(category.getCategoryName());
         dto.setDescription(category.getDescription());
+        dto.setStatus(category.getStatus());
         return dto;
     }
 }

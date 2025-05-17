@@ -3,8 +3,13 @@ package org.elearning.controller;
 import lombok.RequiredArgsConstructor;
 import org.elearning.dto.elearning.CourseDTO;
 import org.elearning.service.CourseService;
+import org.elearning.service.impl.FileStorageService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -15,6 +20,7 @@ import java.util.UUID;
 public class CourseController {
 
     private final CourseService courseService;
+    private final FileStorageService storageService;  // File storage
 
     // Lấy tất cả khóa học
     @GetMapping
@@ -26,7 +32,9 @@ public class CourseController {
     @GetMapping("/{id}")
     public ResponseEntity<CourseDTO> getCourseById(@PathVariable UUID id) {
         CourseDTO course = courseService.getCourseById(id);
-        return course != null ? ResponseEntity.ok(course) : ResponseEntity.notFound().build();
+        return course != null
+                ? ResponseEntity.ok(course)
+                : ResponseEntity.notFound().build();
     }
 
     // Tạo khóa học mới
@@ -37,9 +45,14 @@ public class CourseController {
 
     // Cập nhật khóa học
     @PutMapping("/{id}")
-    public ResponseEntity<CourseDTO> updateCourse(@PathVariable UUID id, @RequestBody CourseDTO courseDTO) {
+    public ResponseEntity<CourseDTO> updateCourse(
+            @PathVariable UUID id,
+            @RequestBody CourseDTO courseDTO
+    ) {
         CourseDTO updated = courseService.updateCourse(id, courseDTO);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
+        return updated != null
+                ? ResponseEntity.ok(updated)
+                : ResponseEntity.notFound().build();
     }
 
     // Xóa khóa học
@@ -47,5 +60,26 @@ public class CourseController {
     public ResponseEntity<Void> deleteCourse(@PathVariable UUID id) {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Upload ảnh cho khóa học
+    @PostMapping(
+            path = "/{id}/image",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<CourseDTO> uploadImage(
+            @PathVariable UUID id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        // 1. Lưu file và lấy filename
+        String filename = storageService.store(file);
+        // 2. Build URL truy cập file
+        String url = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/files/")
+                .path(filename)
+                .toUriString();
+        // 3. Cập nhật URL vào Course
+        CourseDTO updated = courseService.updateImage(id, url);
+        return ResponseEntity.ok(updated);
     }
 }
