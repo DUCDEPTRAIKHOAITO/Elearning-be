@@ -48,6 +48,7 @@ public class CourseServiceImpl implements CourseService {
         course.setName(courseDTO.getName());
         course.setDescription(courseDTO.getDescription());
         course.setCategory(categoryRepository.findById(UUID.fromString(courseDTO.getCategoryId())).orElse(null));
+        course.setImageUrl(courseDTO.getImageUrl());
         // Mapping trạng thái từ DTO xuống Entity
         if (courseDTO.getCourseStatus() != null) {
             course.setStatus(CourseStatus.valueOf(courseDTO.getCourseStatus()));
@@ -67,6 +68,7 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new IllegalArgumentException("Course not found: " + id));
         course.setImageUrl(imageUrl);
         Course saved = courseRepository.save(course);
+
         // nếu bạn có method convertToDTO, nhớ set thêm field imageUrl vào DTO
         return convertToDTO(saved);
     }
@@ -76,6 +78,7 @@ public class CourseServiceImpl implements CourseService {
         if (existingCourse.isPresent()) {
             Course course = existingCourse.get();
             course.setName(courseDTO.getName());
+            course.setImageUrl(courseDTO.getImageUrl());
             course.setDescription(courseDTO.getDescription());
             course.setCategory(
                     categoryRepository.findById(UUID.fromString(courseDTO.getCategoryId()))
