@@ -93,6 +93,15 @@ public class CourseServiceImpl implements CourseService {
         }
         return null;
     }
+    @Override
+    @Transactional
+    public List<CourseDTO> searchCourses(String keyword) {
+        return courseRepository
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     @Override
     // Delete course
