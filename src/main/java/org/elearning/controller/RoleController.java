@@ -28,23 +28,4 @@ public class RoleController {
         return role != null ? ResponseEntity.ok(role) : ResponseEntity.notFound().build();
     }
 
-    // Tạo role mới
-    @PostMapping("/create")
-    public ResponseEntity<RoleDTO> createRole(@RequestBody RoleDTO roleDTO) {
-        return ResponseEntity.ok(roleService.createRole(roleDTO));
-    }
-
-    // Cập nhật role
-    @PutMapping("/{id}")
-    public ResponseEntity<RoleDTO> updateRole(@PathVariable String id, @RequestBody RoleDTO roleDTO) {
-        RoleDTO updated = roleService.updateRole(id, roleDTO);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
-    }
-
-    // Xóa role
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRole(@PathVariable String id) {
-        roleService.deleteRole(id);
-        return ResponseEntity.noContent().build();
-    }
 }
