@@ -14,4 +14,12 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
 
     // Tìm Course theo tên
     List<Course> findByName(String name);
+    // Tìm Course tên chứa keyword (ignore case)
+    List<Course> findByNameContainingIgnoreCase(String keyword);
+
+    // Tìm Course tên hoặc mô tả chứa keyword (ignore case)
+    List<Course> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            String nameKeyword,
+            String descriptionKeyword
+    );
 }

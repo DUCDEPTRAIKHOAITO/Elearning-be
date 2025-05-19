@@ -12,4 +12,7 @@ public interface CourseService {
     CourseDTO updateCourse(UUID id, CourseDTO courseDTO);
     void deleteCourse(UUID id);
     CourseDTO updateImage(UUID id, String imageUrl);
+//        * Tìm kiếm khóa học theo tên hoặc mô tả chứa keyword
+
+    List<CourseDTO> searchCourses(String keyword);
 }

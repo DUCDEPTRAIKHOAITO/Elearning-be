@@ -62,6 +62,21 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<CourseDTO>> searchCourses(
+            @RequestParam(value = "keyword", required = false) String keyword
+    ) {
+        List<CourseDTO> results;
+        if (keyword != null && !keyword.isBlank()) {
+            results = courseService.searchCourses(keyword);
+        } else {
+            results = courseService.getAllCourses();
+        }
+        return ResponseEntity.ok(results);
+    }
+
+
+
     // Upload ảnh cho khóa học
     @PostMapping(
             path = "/{id}/image",
