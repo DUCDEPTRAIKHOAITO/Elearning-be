@@ -48,4 +48,9 @@ public class LessonController {
         lessonService.deleteLesson(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/course/{courseId}")
+    public ResponseEntity<List<LessonDTO>> getLessonsByCourseId(@PathVariable UUID courseId) {
+        List<LessonDTO> lessons = lessonService.getLessonsByCourseId(courseId);
+        return ResponseEntity.ok(lessons);
+    }
 }
