@@ -97,4 +97,5 @@ public class CourseController {
         CourseDTO updated = courseService.updateImage(id, url);
         return ResponseEntity.ok(updated);
     }
+
 }

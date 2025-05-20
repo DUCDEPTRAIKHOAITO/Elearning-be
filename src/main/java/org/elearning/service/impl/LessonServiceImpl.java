@@ -86,6 +86,14 @@ public class LessonServiceImpl implements LessonService {
         }
         return null;
     }
+    @Override
+    public List<LessonDTO> getLessonsByCourseId(UUID courseId) {
+        return lessonRepository.findByCourseId(courseId)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public void deleteLesson(UUID id) {

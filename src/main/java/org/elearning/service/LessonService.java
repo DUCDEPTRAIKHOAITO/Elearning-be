@@ -11,4 +11,6 @@ public interface LessonService {
     LessonDTO createLesson(LessonDTO lessonDTO);
     LessonDTO updateLesson(UUID id, LessonDTO lessonDTO);
     void deleteLesson(UUID id);
+    List<LessonDTO> getLessonsByCourseId(UUID courseId);
+
 }
