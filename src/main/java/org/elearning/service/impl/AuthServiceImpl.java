@@ -12,8 +12,6 @@ import org.elearning.respository.UserRepository;
 import org.elearning.security.JwtUtil;
 import org.elearning.service.AuthService;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,13 +26,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-           throw new RuntimeException("Email đã tồn tại");
-        }
-
-        Optional<Role> role = roleRepository.findByName(RoleInfo.User.name());
-
-        if (role.isEmpty()) {
-            throw new RuntimeException("Role not found");
+            throw new RuntimeException("Email đã tồn tại");
         }
 
         User user = new User();
@@ -42,9 +34,15 @@ public class AuthServiceImpl implements AuthService {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
-        user.setRole(role.get());
 
-       userRepository.save(user);
+        if (request.getRoleId() != null) {
+            Optional<Role> role = roleRepository.findById(UUID.fromString(request.getRoleId()));
+            user.setRole(role.orElse(null));
+        } else {
+            user.setRole(null); // Cho phép null
+        }
+
+        userRepository.save(user);
     }
 
     @Override
@@ -57,10 +55,10 @@ public class AuthServiceImpl implements AuthService {
             authResponseDTO.setEmail(userOpt.get().getEmail());
             authResponseDTO.setToken(token);
             authResponseDTO.setUsername(userOpt.get().getName());
-            authResponseDTO.setRole(userOpt.get().getRole().getName());
+            // Kiểm tra role có null không trước khi lấy tên
+            authResponseDTO.setRole(userOpt.get().getRole() != null ? userOpt.get().getRole().getName() : null);
             return authResponseDTO;
-        }
-        else {
+        } else {
             throw new RuntimeException("Wrong email or password");
         }
     }
