@@ -27,6 +27,11 @@ public class CourseController {
     public ResponseEntity<List<CourseDTO>> getAllCourses() {
         return ResponseEntity.ok(courseService.getAllCourses());
     }
+    // API cho người dùng - chỉ trả về các khóa học đang mở
+    @GetMapping("/public")
+    public ResponseEntity<List<CourseDTO>> getActiveCourses() {
+        return ResponseEntity.ok(courseService.getActiveCourses());
+    }
 
     // Lấy khóa học theo ID
     @GetMapping("/{id}")
@@ -54,6 +59,9 @@ public class CourseController {
                 ? ResponseEntity.ok(updated)
                 : ResponseEntity.notFound().build();
     }
+
+
+
 
     // Xóa khóa học
     @DeleteMapping("/{id}")

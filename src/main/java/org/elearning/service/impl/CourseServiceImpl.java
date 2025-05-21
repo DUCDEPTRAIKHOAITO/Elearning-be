@@ -40,6 +40,13 @@ public class CourseServiceImpl implements CourseService {
         Optional<Course> course = courseRepository.findById(id);
         return course.map(this::convertToDTO).orElse(null);
     }
+    @Override
+    public List<CourseDTO> getActiveCourses() {
+        List<Course> courses = courseRepository.findByStatus(CourseStatus.ACTIVE);
+        return courses.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     @Override
     // Create new course
@@ -115,11 +122,19 @@ public class CourseServiceImpl implements CourseService {
         dto.setId(course.getId().toString());
         dto.setName(course.getName());
         dto.setDescription(course.getDescription());
-        dto.setCategoryId(course.getCategory().getId().toString());
+
+        // ✅ Fix null pointer nếu category chưa được gán
+        if (course.getCategory() != null) {
+            dto.setCategoryId(course.getCategory().getId().toString());
+        } else {
+            dto.setCategoryId(null);
+        }
+
         dto.setImageUrl(course.getImageUrl());
         dto.setCourseStatus(course.getStatus() != null
                 ? course.getStatus().name()
                 : null);
         return dto;
     }
+
 }
