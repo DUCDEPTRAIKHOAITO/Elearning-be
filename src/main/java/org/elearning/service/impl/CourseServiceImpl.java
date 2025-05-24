@@ -3,11 +3,13 @@ package org.elearning.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.elearning.dto.elearning.CourseDTO;
+import org.elearning.dto.elearning.LessonDTO;
 import org.elearning.enums.CourseStatus;
 import org.elearning.model.Course;
 import org.elearning.respository.CourseRepository;
 import org.elearning.respository.CategoryRepository;
 import org.elearning.service.CourseService;
+import org.elearning.service.LessonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,7 @@ public class CourseServiceImpl implements CourseService {
 
 
     private final CourseRepository courseRepository;
+    private final LessonService lessonService;
 
 
     private final CategoryRepository categoryRepository;
@@ -38,7 +41,10 @@ public class CourseServiceImpl implements CourseService {
     // Get course by ID
     public CourseDTO getCourseById(UUID id) {
         Optional<Course> course = courseRepository.findById(id);
-        return course.map(this::convertToDTO).orElse(null);
+        CourseDTO courseDTO = course.map(this::convertToDTO).orElse(null);
+        List<LessonDTO> lessonDTOS = lessonService.getLessonsByCourseId(course.get().getId());
+        courseDTO.setLessons(lessonDTOS);
+        return courseDTO;
     }
     @Override
     public List<CourseDTO> getActiveCourses() {

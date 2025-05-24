@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.elearning.dto.elearning.auth.AuthResponseDTO;
 import org.elearning.dto.elearning.auth.LoginRequest;
 import org.elearning.dto.elearning.auth.RegisterRequest;
-import org.elearning.enums.RoleInfo;
 import org.elearning.model.Role;
 import org.elearning.model.User;
 import org.elearning.respository.RoleRepository;
