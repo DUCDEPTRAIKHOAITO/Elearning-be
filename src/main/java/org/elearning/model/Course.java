@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.elearning.enums.CourseStatus;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -26,4 +27,7 @@ public class Course {
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    @OneToMany(mappedBy = "course")
+    private Set<Lesson> lesson;
 }

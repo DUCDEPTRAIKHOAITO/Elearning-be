@@ -24,5 +24,5 @@ public class Lesson {
 
     private Instant lessonDate;
 
-    // Getters and Setters are automatically handled by Lombok's @Data annotation
+
 }

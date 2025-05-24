@@ -2,6 +2,9 @@ package org.elearning.dto.elearning;
 
 import lombok.Data;
 
+import java.util.List;
+import java.util.Set;
+
 @Data
 public class CourseDTO {
     private String id;
@@ -10,4 +13,5 @@ public class CourseDTO {
     private String description;
     private String courseStatus;
     private String imageUrl;
+    private List<LessonDTO> lessons;
 }
