@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class EnrollmentDTO {
     private String id;
+    private String learnerName;
     private String learnerId; // Liên kết với Learner
     private String courseId;  // Liên kết với Course
     private String enrollmentDate;

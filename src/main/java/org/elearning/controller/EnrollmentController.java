@@ -2,6 +2,7 @@ package org.elearning.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.elearning.dto.elearning.EnrollmentDTO;
+import org.elearning.enums.EnrollmentStatus;
 import org.elearning.service.EnrollmentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,5 +48,19 @@ public class EnrollmentController {
     public ResponseEntity<Void> deleteEnrollment(@PathVariable UUID id) {
         enrollmentService.deleteEnrollment(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ✅ Lấy danh sách ghi danh theo khóa học (Admin)
+    @GetMapping("/course/{courseId}/enrollments")
+    public ResponseEntity<List<EnrollmentDTO>> getEnrollmentsByCourse(@PathVariable UUID courseId) {
+        return ResponseEntity.ok(enrollmentService.getEnrollmentsByCourse(courseId));
+    }
+
+    // ✅ Cập nhật trạng thái ghi danh (duyệt / hủy)
+    @PutMapping("/{enrollmentId}/status")
+    public ResponseEntity<EnrollmentDTO> updateEnrollmentStatus(
+            @PathVariable UUID enrollmentId,
+            @RequestParam EnrollmentStatus status) {
+        return ResponseEntity.ok(enrollmentService.updateEnrollmentStatus(enrollmentId, status));
     }
 }

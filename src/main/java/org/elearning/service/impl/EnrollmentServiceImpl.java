@@ -8,7 +8,6 @@ import org.elearning.respository.EnrollmentRepository;
 import org.elearning.respository.CourseRepository;
 import org.elearning.respository.LearnerRepository;
 import org.elearning.service.EnrollmentService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -31,6 +30,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         dto.setId(enrollment.getId().toString());
         if (enrollment.getLearner() != null) {
             dto.setLearnerId(enrollment.getLearner().getId().toString());
+            dto.setLearnerName(enrollment.getLearner().getUser().getName());
+            // assuming Learner has getUser().getUsername()
         }
         if (enrollment.getCourse() != null) {
             dto.setCourseId(enrollment.getCourse().getId().toString());
@@ -62,23 +63,28 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public EnrollmentDTO createEnrollment(EnrollmentDTO dto) {
         Enrollment enrollment = new Enrollment();
+
         // Map relations
         UUID learnerId = UUID.fromString(dto.getLearnerId());
         learnerRepository.findById(learnerId).ifPresent(enrollment::setLearner);
+
         UUID courseId = UUID.fromString(dto.getCourseId());
         courseRepository.findById(courseId).ifPresent(enrollment::setCourse);
+
         // Map date
         if (dto.getEnrollmentDate() != null) {
             enrollment.setEnrollmentDate(Instant.parse(dto.getEnrollmentDate()));
         } else {
             enrollment.setEnrollmentDate(Instant.now());
         }
-        // Map status
+
+        // Set status
         if (dto.getEnrollmentStatus() != null) {
             enrollment.setStatus(EnrollmentStatus.valueOf(dto.getEnrollmentStatus()));
         } else {
             enrollment.setStatus(EnrollmentStatus.PENDING);
         }
+
         enrollment = enrollmentRepository.save(enrollment);
         return convertToDTO(enrollment);
     }
@@ -88,19 +94,24 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Optional<Enrollment> existing = enrollmentRepository.findById(id);
         if (existing.isPresent()) {
             Enrollment enrollment = existing.get();
+
             // Update relations
             UUID learnerId = UUID.fromString(dto.getLearnerId());
             learnerRepository.findById(learnerId).ifPresent(enrollment::setLearner);
+
             UUID courseId = UUID.fromString(dto.getCourseId());
             courseRepository.findById(courseId).ifPresent(enrollment::setCourse);
+
             // Update date
             if (dto.getEnrollmentDate() != null) {
                 enrollment.setEnrollmentDate(Instant.parse(dto.getEnrollmentDate()));
             }
+
             // Update status
             if (dto.getEnrollmentStatus() != null) {
                 enrollment.setStatus(EnrollmentStatus.valueOf(dto.getEnrollmentStatus()));
             }
+
             enrollment = enrollmentRepository.save(enrollment);
             return convertToDTO(enrollment);
         }
@@ -110,5 +121,24 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public void deleteEnrollment(UUID id) {
         enrollmentRepository.deleteById(id);
+    }
+
+    // ✅ Lấy danh sách học viên đã đăng ký theo khóa học
+    @Override
+    public List<EnrollmentDTO> getEnrollmentsByCourse(UUID courseId) {
+        return enrollmentRepository.findByCourseId(courseId)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    // ✅ Cập nhật trạng thái đăng ký (admin duyệt hoặc từ chối)
+    @Override
+    public EnrollmentDTO updateEnrollmentStatus(UUID enrollmentId, EnrollmentStatus status) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new RuntimeException("Enrollment not found"));
+        enrollment.setStatus(status);
+        enrollmentRepository.save(enrollment);
+        return convertToDTO(enrollment);
     }
 }
