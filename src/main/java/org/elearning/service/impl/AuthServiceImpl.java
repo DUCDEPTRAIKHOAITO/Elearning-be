@@ -53,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
             AuthResponseDTO authResponseDTO = new AuthResponseDTO();
             authResponseDTO.setEmail(userOpt.get().getEmail());
             authResponseDTO.setToken(token);
+            authResponseDTO.setId(userOpt.get().getId().toString());
             authResponseDTO.setUsername(userOpt.get().getName());
             // Kiểm tra role có null không trước khi lấy tên
             authResponseDTO.setRole(userOpt.get().getRole() != null ? userOpt.get().getRole().getName() : null);
